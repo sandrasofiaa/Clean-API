@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Commands.Dogs
 {
-    internal sealed class AddDogCommandHandler : IRequestHandler<AddDogCommand, Dog>
+    public class AddDogCommandHandler : IRequestHandler<AddDogCommand, Dog>
     {
         private readonly MockDatabase _mockDatabase;
 
@@ -16,6 +16,11 @@ namespace Application.Commands.Dogs
 
         public Task<Dog> Handle(AddDogCommand request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(request.NewDog.Name))
+            {
+                throw new ArgumentException("Dog name cannot be empty or whitespace");
+            }
+
             Dog dogToCreate = new()
             {
                 Id = Guid.NewGuid(),
