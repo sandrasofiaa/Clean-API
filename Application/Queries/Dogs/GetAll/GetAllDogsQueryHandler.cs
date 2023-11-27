@@ -8,7 +8,7 @@ namespace Application.Queries.Dogs
     public class GetAllDogsQueryHandler : IRequestHandler<GetAllDogsQuery, List<Dog>>
     {
         private readonly MockDatabase _mockDatabase;
-        
+
         public GetAllDogsQueryHandler(MockDatabase mockDatabase)
         {
             _mockDatabase = mockDatabase;
