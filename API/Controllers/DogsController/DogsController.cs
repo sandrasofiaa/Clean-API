@@ -1,4 +1,5 @@
 ﻿using Application.Commands.Dogs;
+using Application.Commands.Dogs.DeleteDog;
 using Application.Commands.Dogs.UpdateDog;
 using Application.Dtos;
 using Application.Queries.Dogs.GetAll;
@@ -12,10 +13,10 @@ namespace API.Controllers.DogsController
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DogsController : ControllerBase
+    public class DogController : ControllerBase
     {
         internal readonly IMediator _mediator;
-        public DogsController(IMediator mediator)
+        public DogController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -42,7 +43,14 @@ namespace API.Controllers.DogsController
         [Route("addNewDog")]
         public async Task<IActionResult> AddDog([FromBody] DogDto newDog)
         {
-            return Ok(await _mediator.Send(new AddDogCommand(newDog)));
+            try
+            {
+                return Ok(await _mediator.Send(new AddDogCommand(newDog)));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // Update a specific dog
@@ -55,5 +63,21 @@ namespace API.Controllers.DogsController
 
         // IMPLEMENT DELETE !!!
 
+        [HttpDelete]
+        [Route("{DeleteDogId}")]
+        public async Task<IActionResult> DeleteDog(Guid DeleteDogId)
+        {
+            var deleteCommand = new DeleteDogByIdCommand(DeleteDogId);
+            var deletionResult = await _mediator.Send(deleteCommand);
+
+            if (deletionResult)
+            {
+                return Ok("Dog deleted successfully");
+            }
+            else
+            {
+                return BadRequest("Failed to delete dog");
+            }
+        }
     }
 }
