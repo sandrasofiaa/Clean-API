@@ -1,9 +1,4 @@
-﻿using NUnit.Framework;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
-using Application.Commands.Birds.UpdateBird;
+﻿using Application.Commands.Birds.UpdateBird;
 using Application.Commands.Birds.UpdatedBird;
 using Application.Dtos;
 using Infrastructure.Database;
