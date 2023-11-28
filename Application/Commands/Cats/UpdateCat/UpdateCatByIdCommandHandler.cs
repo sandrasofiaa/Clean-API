@@ -1,9 +1,9 @@
-﻿using Application.Commands.Cats.UpdatedCat;
+﻿using Application.Commands.Cats.UpdateCat;
 using Domain.Models;
 using Infrastructure.Database;
 using MediatR;
 
-namespace Application.Cats.UpdatedCat.UpdateBird
+namespace AApplication.Commands.Cats.UpdateCat
 {
     public class UpdateCatByIdCommandHandler : IRequestHandler<UpdateCatByIdCommand, Cat>
     {

@@ -2,7 +2,7 @@
 using Domain.Models;
 using MediatR;
 
-namespace Application.Commands.Cats.UpdatedCat
+namespace Application.Commands.Cats.UpdateCat
 {
     public class UpdateCatByIdCommand : IRequest<Cat>
     {
