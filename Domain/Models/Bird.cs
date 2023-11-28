@@ -4,7 +4,7 @@ namespace Domain.Models
 {
     public class Bird : AnimalModel
     {
-        public string screams()
+        public string Screams()
         {
             return "This animal screams";
         }
