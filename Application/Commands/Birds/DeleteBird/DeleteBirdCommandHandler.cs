@@ -16,7 +16,7 @@ namespace Application.Commands.Birds.DeleteBird
 
         public Task<bool> Handle(DeleteBirdByIdCommand request, CancellationToken cancellationToken)
         {
-            Bird birdToDelete = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
+            Bird? birdToDelete = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
 
             if (birdToDelete != null)
             {
