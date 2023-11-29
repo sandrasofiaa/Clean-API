@@ -1,9 +1,12 @@
-﻿using Application.Commands.Dogs;
+﻿using Application.Commands.Cats.AddCat;
+using Application.Commands.Dogs;
 using Application.Dtos;
+using Domain.Models;
 using Infrastructure.Database;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,26 +15,31 @@ namespace Test.DogTests.CommandTest
     [TestFixture]
     public class AddDogTests
     {
+        private AddDogCommandHandler _handler;
+        private MockDatabase _mockDatabase;
+
+        [SetUp]
+        public void SetUp()
+        {
+            // Initialize the handler and mock database before each test
+            _mockDatabase = new MockDatabase();
+            _handler = new AddDogCommandHandler(_mockDatabase);
+        }
+
         [Test]
-        public async Task Handle_AddsNewDogToDatabase()
+        public async Task GivenValidDogDto_AddDogReturnsNewDog()
         {
             // Arrange
-            var mockDatabase = new MockDatabase();
-            var dogHandler = new AddDogCommandHandler(mockDatabase);
-
-            var expectedDogName = "Rex";
-            var addDogCommand = new AddDogCommand(new DogDto { Name = expectedDogName });
+            var DogDto = new DogDto { Name = "Fido" };
+            var addDogCommand = new AddDogCommand(DogDto);
 
             // Act
-            var newlyAddedDog = await dogHandler.Handle(addDogCommand, CancellationToken.None);
+            Dog addedDog = await _handler.Handle(addDogCommand, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(newlyAddedDog);
-            Assert.That(newlyAddedDog.Name, Is.EqualTo(expectedDogName));
-
-            // Check if the newly added dog exists in the mock database
-            var isDogAddedToDatabase = mockDatabase.Dogs.Any(d => d.Id == newlyAddedDog.Id && d.Name == expectedDogName);
-            Assert.IsTrue(isDogAddedToDatabase);
+            Assert.IsNotNull(addedDog);
+            Assert.That(addedDog.Name, Is.EqualTo(DogDto.Name));
+            Assert.IsTrue(_mockDatabase.Dogs.Contains(addedDog));
         }
 
         [Test]
