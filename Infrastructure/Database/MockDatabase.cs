@@ -47,5 +47,18 @@ namespace Infrastructure.Database
             new Cat { Id = new Guid("87654321-4321-8765-4321-876543210123"), Name = "Fluffy"},
             new Cat { Id = new Guid("87654321-4321-8765-4321-876543210124"), Name = "Mittens"}
         };
+
+        public List<User> Users
+        {
+            get { return allUsers; }
+            set { allUsers = value; }
+        }
+
+        private static List<User> allUsers = new()
+        {
+            new User { Id = Guid.NewGuid(), UserName = "Nils" },
+            new User { Id = Guid.NewGuid(), UserName = "Kalle" },
+
+        };
     }
 }

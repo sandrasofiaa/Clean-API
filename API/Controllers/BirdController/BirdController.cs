@@ -5,12 +5,14 @@ using Application.Dtos;
 using Application.Queries.Birds.GetAll;
 using Application.Queries.Birds.GetById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API.Controllers.BirdController
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BirdController : ControllerBase

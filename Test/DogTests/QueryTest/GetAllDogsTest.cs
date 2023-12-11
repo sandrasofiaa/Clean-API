@@ -2,10 +2,6 @@
 using Application.Queries.Dogs.GetAll;
 using Domain.Models;
 using Infrastructure.Database;
-using NUnit.Framework;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Test.DogTests.QueryTest
 {

@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-using Application.Commands.Birds.AddBird;
-using System;
+﻿using Application.Commands.Birds.AddBird;
 using Application.Dtos;
 using Domain.Models;
 using Infrastructure.Database;
