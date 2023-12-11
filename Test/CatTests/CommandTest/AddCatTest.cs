@@ -1,9 +1,7 @@
-﻿using NUnit.Framework;
-using System;
+﻿using Application.Commands.Cats.AddCat;
 using Application.Dtos;
 using Domain.Models;
 using Infrastructure.Database;
-using Application.Commands.Cats.AddCat;
 
 namespace Test.CatTests.CommandTest
 {

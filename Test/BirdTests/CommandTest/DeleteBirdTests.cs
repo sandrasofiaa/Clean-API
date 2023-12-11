@@ -1,5 +1,5 @@
-﻿using Infrastructure.Database;
-using Application.Commands.Birds.DeleteBird;
+﻿using Application.Commands.Birds.DeleteBird;
+using Infrastructure.Database;
 
 namespace Test.BirdTests.CommandTest
 {

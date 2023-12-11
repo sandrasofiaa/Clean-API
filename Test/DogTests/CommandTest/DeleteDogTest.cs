@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-using Application.Commands.Dogs.DeleteDog;
-using System;
+﻿using Application.Commands.Dogs.DeleteDog;
 using Domain.Models;
 using Infrastructure.Database;
 
