@@ -1,14 +1,7 @@
-﻿using Application.Commands.Cats.AddCat;
-using Application.Commands.Dogs;
+﻿using Application.Commands.Dogs;
 using Application.Dtos;
 using Domain.Models;
 using Infrastructure.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Test.DogTests.CommandTest
 {

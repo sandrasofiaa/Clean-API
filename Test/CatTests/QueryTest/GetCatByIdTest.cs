@@ -1,11 +1,6 @@
 ﻿using Application.Queries.Birds.GetById;
 using Application.Queries.Cats.GetById;
-using Domain.Models;
 using Infrastructure.Database;
-using NUnit.Framework;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Test.CatTests.QueryTest
 {

@@ -1,6 +1,5 @@
 ﻿using Application.Commands.Dogs.UpdateDog;
 using Application.Dtos;
-using Domain.Models;
 using Infrastructure.Database;
 
 namespace Test.DogTests.CommandTest
