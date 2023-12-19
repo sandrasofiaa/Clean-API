@@ -11,7 +11,7 @@ namespace Domain.Models
 
         public bool LikesToPlay { get; set; }
 
-        public string Breed {  get; set; }
+        public string Breed { get; set; }
 
         public int Weight { get; set; }
     }

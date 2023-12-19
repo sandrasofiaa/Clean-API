@@ -8,12 +8,12 @@ namespace Application.Handlers.Users
     public class UpdateUserAnimalHandler : IRequestHandler<UpdateUserAnimalCommand, Unit>
     {
         private readonly IUserRepository _userRepository;
-        private readonly ILogger<UpdateUserAnimalHandler> _logger; 
+        private readonly ILogger<UpdateUserAnimalHandler> _logger;
 
         public UpdateUserAnimalHandler(IUserRepository userRepository, ILogger<UpdateUserAnimalHandler> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger)); 
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Unit> Handle(UpdateUserAnimalCommand request, CancellationToken cancellationToken)

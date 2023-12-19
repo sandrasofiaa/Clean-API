@@ -101,7 +101,7 @@ namespace API.Controllers.BirdController
         [HttpGet("color/{color}")]
         public async Task<ActionResult<List<Bird>>> GetBirdsByColor(string color)
         {
-            var query = new GetBirdByColorQuery (color);
+            var query = new GetBirdByColorQuery(color);
             var birds = await _mediator.Send(query);
 
             return Ok(birds);
