@@ -1,28 +1,28 @@
 ﻿using Application.Commands.Cats.AddCat;
 using Application.Dtos;
-using Application.Validators.CatValidator; 
+using Application.Validators.CatValidator;
 using Domain.Models;
 using FluentValidation;
 using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Commands.Cats 
+namespace Application.Commands.Cats
 {
-    public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat> 
+    public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat>
     {
         private readonly IAnimalRepository _animalRepository;
 
-        public AddCatCommandHandler(IAnimalRepository animalRepository, IValidator<CatDto> validator) 
+        public AddCatCommandHandler(IAnimalRepository animalRepository, IValidator<CatDto> validator)
         {
             _animalRepository = animalRepository;
         }
 
-        public async Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken) 
+        public async Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken)
         {
-            var catDto = request.NewCat; 
+            var catDto = request.NewCat;
 
             // Perform validation using CatValidator
-            var validationResult = await new CatValidator().ValidateAsync(catDto, cancellationToken); 
+            var validationResult = await new CatValidator().ValidateAsync(catDto, cancellationToken);
             if (!validationResult.IsValid)
             {
                 throw new ValidationException(validationResult.Errors);
