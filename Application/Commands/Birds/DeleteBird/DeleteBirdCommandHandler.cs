@@ -1,32 +1,37 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Commands.Birds.DeleteBird;
+using Application.Validators;
+using Domain.Models;
+using Infrastructure.Interface;
 using MediatR;
 
-
-namespace Application.Commands.Birds.DeleteBird
+public class DeleteBirdByIdCommandHandler : IRequestHandler<DeleteBirdByIdCommand, bool>
 {
-    public class DeleteBirdByIdCommandHandler : IRequestHandler<DeleteBirdByIdCommand, bool>
-    {
-        private readonly MockDatabase _mockDatabase;
+    private readonly IAnimalRepository _animalRepository;
 
-        public DeleteBirdByIdCommandHandler(MockDatabase mockDatabase)
+    public DeleteBirdByIdCommandHandler(IAnimalRepository animalRepository)
+    {
+        _animalRepository = animalRepository;
+    }
+
+    public async Task<bool> Handle(DeleteBirdByIdCommand request, CancellationToken cancellationToken)
+    {
+        var validator = new GuidValidator();
+        var validationResult = await validator.ValidateAsync(request.Id);
+
+        if (!validationResult.IsValid)
         {
-            _mockDatabase = mockDatabase;
+            return false;
         }
 
-        public Task<bool> Handle(DeleteBirdByIdCommand request, CancellationToken cancellationToken)
+        try
         {
-            Bird? birdToDelete = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
-
-            if (birdToDelete != null)
-            {
-                _mockDatabase.Birds.Remove(birdToDelete);
-                return Task.FromResult(true);
-            }
-            else
-            {
-                return Task.FromResult(false);
-            }
+            // Anropa DeleteAsync<Bird> för att ta bort en fågel från databasen med request.Id
+            await _animalRepository.DeleteAsync<Bird>(request.Id);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 }

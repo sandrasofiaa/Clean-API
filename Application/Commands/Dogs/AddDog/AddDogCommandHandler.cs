@@ -1,34 +1,49 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Dtos;
+using Application.Validators.DogValidator;
+using Domain.Models;
+using FluentValidation;
+using Infrastructure.Interface;
 using MediatR;
 
 namespace Application.Commands.Dogs
 {
     public class AddDogCommandHandler : IRequestHandler<AddDogCommand, Dog>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public AddDogCommandHandler(MockDatabase mockDatabase)
+        public AddDogCommandHandler(IAnimalRepository animalRepository, IValidator<DogDto> validator)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<Dog> Handle(AddDogCommand request, CancellationToken cancellationToken)
+        public async Task<Dog> Handle(AddDogCommand request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.NewDog.Name))
+            var dogDto = request.NewDog;
+
+            // Perform validation using DogValidator
+            var validationResult = await new DogValidator().ValidateAsync(dogDto, cancellationToken);
+            if (!validationResult.IsValid)
             {
-                throw new ArgumentException("Dog name cannot be empty or whitespace");
+                throw new ValidationException(validationResult.Errors);
             }
 
-            Dog dogToCreate = new()
+            Dog dogToCreate = new Dog
             {
-                Id = Guid.NewGuid(),
-                Name = request.NewDog.Name
+                AnimalId = Guid.NewGuid(),
+                Name = dogDto.Name,
+                Breed = dogDto.Breed,
+                Weight = (int)dogDto.Weight
             };
 
-            _mockDatabase.Dogs.Add(dogToCreate);
-
-            return Task.FromResult(dogToCreate);
+            try
+            {
+                await _animalRepository.AddAnimalAsync(dogToCreate);
+                return dogToCreate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to add dog to the database", ex);
+            }
         }
     }
 }

@@ -1,31 +1,33 @@
 ﻿using Domain.Models;
-using Infrastructure.Database;
+using Infrastructure.Interface; // Byt ut mot din faktiska namespace
 using MediatR;
-
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Commands.Cats.DeleteCat
 {
     public class DeleteCatByIdCommandHandler : IRequestHandler<DeleteCatByIdCommand, bool>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public DeleteCatByIdCommandHandler(MockDatabase mockDatabase)
+        public DeleteCatByIdCommandHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<bool> Handle(DeleteCatByIdCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(DeleteCatByIdCommand request, CancellationToken cancellationToken)
         {
-            Cat? catToDelete = _mockDatabase.Cats.FirstOrDefault(cat => cat.Id == request.Id);
-
-            if (catToDelete != null)
+            try
             {
-                _mockDatabase.Cats.Remove(catToDelete);
-                return Task.FromResult(true);
+                // Anropa DeleteAsync-metoden från _animalRepository och skicka med request.Id
+                await _animalRepository.DeleteAsync<Cat>(request.Id);
+                return true;
             }
-            else
+            catch (Exception)
             {
-                return Task.FromResult(false);
+                // Hantera undantag om det behövs
+                return false;
             }
         }
     }

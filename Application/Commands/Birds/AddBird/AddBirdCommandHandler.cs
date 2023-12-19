@@ -1,35 +1,43 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Commands.Birds;
+using Domain.Models;
+using Infrastructure.Interface; // Lägg till detta namespace för att använda AnimalRepository
 using MediatR;
 
-namespace Application.Commands.Birds.AddBird
+namespace Application.Commands.Birds
 {
     public class AddBirdCommandHandler : IRequestHandler<AddBirdCommand, Bird>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public AddBirdCommandHandler(MockDatabase mockDatabase)
+        public AddBirdCommandHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<Bird> Handle(AddBirdCommand request, CancellationToken cancellationToken)
+        public async Task<Bird> Handle(AddBirdCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.NewBird.Name))
             {
-                throw new ArgumentException("Bird's name cannot be empty or whitespace");
+                throw new ArgumentException("Bird name cannot be empty or whitespace");
             }
 
-            Bird birdToCreate = new()
+            Bird BirdToCreate = new Bird
             {
-                Id = Guid.NewGuid(),
-                Name = request.NewBird.Name,
-                CanFly = request.NewBird.CanFly
+                AnimalId = Guid.NewGuid(),
+                Name = request.NewBird.Name
+                // Fyll på med andra egenskaper för din hund om det behövs
             };
 
-            _mockDatabase.Birds.Add(birdToCreate);
-
-            return Task.FromResult(birdToCreate);
+            try
+            {
+                await _animalRepository.AddAnimalAsync(BirdToCreate); // Använd generiska metoden här
+                return BirdToCreate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to add Bird to the database", ex);
+            }
         }
     }
+
 }

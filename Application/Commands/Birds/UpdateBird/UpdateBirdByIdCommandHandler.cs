@@ -1,29 +1,39 @@
-﻿using Application.Commands.Birds.UpdatedBird;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Domain.Models;
-using Infrastructure.Database;
+using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Commands.Birds.UpdateBird
+namespace Application.Common.Birds
 {
     public class UpdateBirdByIdCommandHandler : IRequestHandler<UpdateBirdByIdCommand, Bird>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public UpdateBirdByIdCommandHandler(MockDatabase mockDatabase)
+        public UpdateBirdByIdCommandHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
-        public Task<Bird> Handle(UpdateBirdByIdCommand request, CancellationToken cancellationToken)
+
+        public async Task<Bird> Handle(UpdateBirdByIdCommand request, CancellationToken cancellationToken)
         {
-            Bird birdToUpdate = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
+            // Fetch the Bird to update from the repository using a more generic method
+            Bird birdToUpdate = (Bird)await _animalRepository.GetByIdAsync(request.Id);
 
             if (birdToUpdate != null)
             {
+                // Update the properties of the bird
                 birdToUpdate.Name = request.UpdatedBird.Name;
-                birdToUpdate.CanFly = request.UpdatedBird.CanFly;
+
+                // Call your repository method to update the bird in the database
+                await _animalRepository.UpdateAnimalAsync(birdToUpdate);
+
+                // Return the updated bird
+                return birdToUpdate;
             }
 
-            return Task.FromResult(birdToUpdate);
+            // Handle if the bird is not found
+            return null; // or throw an exception
         }
     }
 }

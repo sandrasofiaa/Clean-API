@@ -10,5 +10,7 @@ namespace Domain.Models
         }
 
         public bool CanFly { get; set; }
+
+        public string Color { get; set; }
     }
 }

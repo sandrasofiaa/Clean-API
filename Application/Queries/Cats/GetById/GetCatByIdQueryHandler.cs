@@ -1,23 +1,24 @@
-﻿using Application.Queries.Cats.GetById;
+﻿using Application.Queries.Cats.GetById; // Update the namespace
 using Domain.Models;
-using Infrastructure.Database;
+using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Queries.Birds.GetById
+namespace Application.Animals.Queries.Cats.GetById // Update the namespace
 {
-    public class GetCatBydIdQueryHandler : IRequestHandler<GetCatByIdQuery, Cat?>
+    public class GetCatByIdQueryHandler : IRequestHandler<GetCatByIdQuery, Cat> // Update class and request types
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository; // Change repository interface
 
-        public GetCatBydIdQueryHandler(MockDatabase mockDatabase)
+        public GetCatByIdQueryHandler(IAnimalRepository catRepository) // Change constructor parameter
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = catRepository; // Update repository assignment
         }
 
-        public Task<Cat?> Handle(GetCatByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Cat?> Handle(GetCatByIdQuery request, CancellationToken cancellationToken) // Update return type and request type
         {
-            Cat? wantedCat = _mockDatabase.Cats.FirstOrDefault(cat => cat.Id == request.Id);
-            return Task.FromResult(wantedCat);
+            Cat? wantedCat = await _animalRepository.GetByIdAsync(request.Id) as Cat;
+
+            return wantedCat;
         }
     }
 }

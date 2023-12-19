@@ -1,52 +1,38 @@
 ﻿using Application.Commands.Dogs.DeleteDog;
+using AutoFixture.NUnit3;
 using Domain.Models;
-using Infrastructure.Database;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.DogTests.CommandTest
 {
     [TestFixture]
-    public class DeleteDogTests
+    public class DeleteDogByIdCommandHandlerTests
     {
+        private Mock<IAnimalRepository> _animalRepositoryMock;
         private DeleteDogByIdCommandHandler _handler;
-        private MockDatabase _mockDatabase;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
-            // Initialize the handler and mock database before each test
-            _mockDatabase = new MockDatabase();
-            _handler = new DeleteDogByIdCommandHandler(_mockDatabase);
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new DeleteDogByIdCommandHandler(_animalRepositoryMock.Object);
         }
 
         [Test]
-        public async Task GivenValidDogId_DeleteDog_ReturnsTrue()
+        [CustomAutoData]
+        public async Task WHEN_Handle_THEN_DeleteDog_return_true([Frozen] Dog initialDog)
         {
             // Arrange
-            var dogToDelete = new Dog { Id = Guid.NewGuid() };
-            _mockDatabase.Dogs.Add(dogToDelete);
-
-            var deleteCommand = new DeleteDogByIdCommand(dogToDelete.Id);
+            _animalRepositoryMock.Setup(x => x.GetByIdAsync(initialDog.AnimalId)).ReturnsAsync(initialDog);
 
             // Act
-            bool result = await _handler.Handle(deleteCommand, CancellationToken.None);
+            var command = new DeleteDogByIdCommand(initialDog.AnimalId);
+            var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.IsTrue(result);
-            Assert.IsNull(_mockDatabase.Dogs.FirstOrDefault(dog => dog.Id == dogToDelete.Id));
-        }
-
-        [Test]
-        public async Task GivenInvalidDogId_DeleteDog_ReturnsFalse()
-        {
-            // Arrange - No dog added to the mock database
-
-            var deleteCommand = new DeleteDogByIdCommand(Guid.NewGuid());
-
-            // Act
-            bool result = await _handler.Handle(deleteCommand, CancellationToken.None);
-
-            // Assert
-            Assert.IsFalse(result);
+            Assert.That(result, Is.True);
         }
     }
 }

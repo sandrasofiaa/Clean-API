@@ -1,7 +1,8 @@
 ﻿using Application.Commands.Users;
 using Application.Dtos;
-using Domain.Models;
-using Infrastructure.Database;
+using Application.Queries.Users;
+using Application.Queries.Users.Login;
+using Domain.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -16,29 +17,12 @@ namespace API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly MockDatabase _mockDatabase;
         internal readonly IMediator _mediator;
 
-        public UserController(IConfiguration configuration, MockDatabase mockDatabase, IMediator mediator)
+        public UserController(IConfiguration configuration, IMediator mediator)
         {
             _configuration = configuration;
-            _mockDatabase = mockDatabase;
             _mediator = mediator;
-        }
-
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequests model)
-        {
-            var user = AuthenticateUser(model.Username, model.Password);
-
-            if (user == null)
-            {
-                return Unauthorized("Invalid username or password");
-            }
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new { Token = token });
         }
 
         [HttpPost]
@@ -48,13 +32,17 @@ namespace API.Controllers
             return Ok(await _mediator.Send(new RegisterUserCommand(newUser)));
         }
 
-        private User AuthenticateUser(string username, string password)
+        [HttpPost]
+        [Route("GetUsersWithTheirAnimals")]
+        public async Task<IActionResult> GetUsersWithTheirAnimals()
         {
-            // Replace with your actual authentication logic
-            var user = _mockDatabase.Users.FirstOrDefault(u => u.UserName == username && u.UserPassword == password);
-            return user;
+            var command = new GetUsersWithAnimalsQuery();
+            var usersWithAllTheirAnimals = await _mediator.Send(command);
+
+            return Ok(usersWithAllTheirAnimals);
         }
-        private string GenerateJwtToken(User user)
+
+        private string GenerateJwtToken(UserRegistrationDto loginUser)
         {
             try
             {
@@ -64,8 +52,10 @@ namespace API.Controllers
                 {
                     Subject = new ClaimsIdentity(new[]
                     {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.Name, loginUser.Username),
+                // Anpassa detta beroende på hur du vill använda Password i tokenet
+                // Observera att det normalt inte är rekommenderat att inkludera lösenord i JWT-token
+                new Claim("Password", loginUser.Password)
             }),
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -80,16 +70,148 @@ namespace API.Controllers
                 }
                 else
                 {
-                    // Handle case where token creation failed
-                    return "Token creation failed.";
+                    // Hantera fall där token-skapandet misslyckades
+                    return "Misslyckades med att skapa token.";
                 }
             }
             catch (Exception ex)
             {
-                // Handle exception (log it, throw it further, etc.)
-                return $"Token generation failed. Exception: {ex.Message}";
+                // Hantera exception (logga det, kasta det vidare, etc.)
+                return $"Misslyckades med att generera token. Exception: {ex.Message}";
             }
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserRegistrationDto model)
+        {
+            var userDto = await _mediator.Send(new LoginUserQuery(model));
+
+            if (userDto == null)
+            {
+                return Unauthorized("Invalid username or password");
+            }
+
+            var token = GenerateJwtToken(model); // Använd 'model' istället för 'userDto'
+
+            return Ok(new { Token = token });
+        }
+
+        [HttpPost]
+        [Route("addAnimalToUser")]
+        public async Task<IActionResult> AddAnimalToUser([FromBody] AddAnimalToUserDto dto)
+        {
+            try
+            {
+                // Skapa en UserAnimalDto från UserAnimal-modellen
+                var userAnimalDto = new UserAnimalDto
+                {
+                    UserId = dto.UserId,
+                    AnimalId = dto.AnimalId,
+                    // Andra relevanta egenskaper här...
+                };
+
+                // Skapa en AddNewAnimalCommand med UserAnimalDto
+                var command = new AddNewAnimalCommand(userAnimalDto);
+                var success = await _mediator.Send(command);
+
+                if (success)
+                {
+                    return Ok("Animal added to user successfully");
+                }
+                else
+                {
+                    return BadRequest("Failed to add animal to user");
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        //[HttpPost]
+        //[Route("addAnimalToUser")]
+        //public async Task<IActionResult> AddAnimalToUser([FromBody] AddAnimalToUserDto dto)
+        //{
+        //    try
+        //    {
+        //        var command = new AddNewAnimalCommand(dto.UserId, dto.AnimalId);
+        //        var success = await _mediator.Send(command);
+
+        //        if (success)
+        //        {
+        //            return Ok("Animal added to user successfully");
+        //        }
+        //        else
+        //        {
+        //            return BadRequest("Failed to add animal to user");
+        //        }
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return NotFound(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex.Message);
+        //    }
+        //}
+
+        [HttpDelete]
+        [Route("deleteAnimalFromUser")]
+        public async Task<IActionResult> DeleteAnimalFromUser([FromBody] DeleteAnimalFromUserDto dto)
+        {
+            try
+            {
+                var command = new DeleteAnimalByUserCommand(dto.UserId, dto.AnimalId);
+                await _mediator.Send(command);
+
+                return Ok("Animal deleted from user successfully");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut]
+        [Route("updateUserAnimal")]
+        public async Task<IActionResult> UpdateUserAnimal([FromBody] UpdateUserAnimalDto dto)
+        {
+            var validator = new UpdateUserAnimalDtoValidator();
+            var validationResult = await validator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(error => error.ErrorMessage);
+                return BadRequest(errors);
+            }
+
+            try
+            {
+                var command = new UpdateUserAnimalCommand(dto.UserId, dto.OldAnimalId, dto.NewAnimalId);
+                await _mediator.Send(command);
+
+                return Ok("User's animal updated successfully");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ArgumentException)
+                {
+                    return NotFound(ex.Message);
+                }
+
+                // Print ex.ToString() to get a more detailed error message for debugging
+                return StatusCode(500, ex.ToString());
+            }
+        }
     }
 }
