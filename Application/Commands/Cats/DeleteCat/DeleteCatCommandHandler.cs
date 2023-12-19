@@ -1,34 +1,37 @@
-﻿using Domain.Models;
-using Infrastructure.Interface; // Byt ut mot din faktiska namespace
+﻿using Application.Commands.Cats.DeleteCat;
+using Application.Validators;
+using Domain.Models;
+using Infrastructure.Interface;
 using MediatR;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Application.Commands.Cats.DeleteCat
+public class DeleteCatByIdCommandHandler : IRequestHandler<DeleteCatByIdCommand, bool>
 {
-    public class DeleteCatByIdCommandHandler : IRequestHandler<DeleteCatByIdCommand, bool>
-    {
-        private readonly IAnimalRepository _animalRepository;
+    private readonly IAnimalRepository _animalRepository;
 
-        public DeleteCatByIdCommandHandler(IAnimalRepository animalRepository)
+    public DeleteCatByIdCommandHandler(IAnimalRepository animalRepository)
+    {
+        _animalRepository = animalRepository;
+    }
+
+    public async Task<bool> Handle(DeleteCatByIdCommand request, CancellationToken cancellationToken)
+    {
+        var validator = new GuidValidator();
+        var validationResult = await validator.ValidateAsync(request.Id);
+
+        if (!validationResult.IsValid)
         {
-            _animalRepository = animalRepository;
+            return false;
         }
 
-        public async Task<bool> Handle(DeleteCatByIdCommand request, CancellationToken cancellationToken)
+        try
         {
-            try
-            {
-                // Anropa DeleteAsync-metoden från _animalRepository och skicka med request.Id
-                await _animalRepository.DeleteAsync<Cat>(request.Id);
-                return true;
-            }
-            catch (Exception)
-            {
-                // Hantera undantag om det behövs
-                return false;
-            }
+            // Call DeleteAsync<Cat> to remove a cat from the database using request.Id
+            await _animalRepository.DeleteAsync<Cat>(request.Id);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 }

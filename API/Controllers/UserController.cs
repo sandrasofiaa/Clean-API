@@ -133,34 +133,6 @@ namespace API.Controllers
             }
         }
 
-        //[HttpPost]
-        //[Route("addAnimalToUser")]
-        //public async Task<IActionResult> AddAnimalToUser([FromBody] AddAnimalToUserDto dto)
-        //{
-        //    try
-        //    {
-        //        var command = new AddNewAnimalCommand(dto.UserId, dto.AnimalId);
-        //        var success = await _mediator.Send(command);
-
-        //        if (success)
-        //        {
-        //            return Ok("Animal added to user successfully");
-        //        }
-        //        else
-        //        {
-        //            return BadRequest("Failed to add animal to user");
-        //        }
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return NotFound(ex.Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex.Message);
-        //    }
-        //}
-
         [HttpDelete]
         [Route("deleteAnimalFromUser")]
         public async Task<IActionResult> DeleteAnimalFromUser([FromBody] DeleteAnimalFromUserDto dto)

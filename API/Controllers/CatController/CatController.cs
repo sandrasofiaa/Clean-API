@@ -8,6 +8,7 @@ using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Application.Queries.Cats.GetCatsByBreedAndWeight;
+using Application.Validators.CatValidator;
 
 namespace API.Controllers.CatsController
 {
@@ -42,11 +43,24 @@ namespace API.Controllers.CatsController
             return Ok(await _mediator.Send(new AddCatCommand(newCat)));
         }
 
+        // Update a specific cat
         [HttpPut]
         [Route("updateCat/{updatedCatId}")]
         public async Task<IActionResult> UpdateCat([FromBody] CatDto updatedCat, Guid updatedCatId)
         {
+            // Validate the CatDto using FluentValidation
+            var catValidator = new CatValidator(); // Assuming CatValidator is your FluentValidation validator for CatDto
+            var validationResult = await catValidator.ValidateAsync(updatedCat);
+
+            if (!validationResult.IsValid)
+            {
+                // If validation fails, return a BadRequest with the validation errors
+                return BadRequest(validationResult.Errors);
+            }
+
             var command = new UpdateCatByIdCommand(updatedCat, updatedCatId);
+
+            // Send the command via MediatR and let the handler handle the logic
             var result = await _mediator.Send(command);
             return Ok(result);
         }

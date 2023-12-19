@@ -1,35 +1,30 @@
-﻿using Domain.Models;
+﻿using Application.Commands.Cats.AddCat;
+using Application.Dtos;
+using Application.Validators.CatValidator; 
+using Domain.Models;
+using FluentValidation;
 using Infrastructure.Interface;
 using MediatR;
-using FluentValidation;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.Dtos;
-using Application.Commands.Cats.AddCat;
 
-namespace Application.Commands.Cats
+namespace Application.Commands.Cats 
 {
-    public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat>
+    public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat> 
     {
         private readonly IAnimalRepository _animalRepository;
-        private readonly IValidator<CatDto> _validator;
 
-        public AddCatCommandHandler(IAnimalRepository animalRepository, IValidator<CatDto> validator)
+        public AddCatCommandHandler(IAnimalRepository animalRepository, IValidator<CatDto> validator) 
         {
             _animalRepository = animalRepository;
-            _validator = validator;
         }
 
-        public async Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken)
+        public async Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken) 
         {
-            var catDto = request.NewCat;
+            var catDto = request.NewCat; 
 
-            // Perform validation
-            var validationResult = await _validator.ValidateAsync(catDto, cancellationToken);
+            // Perform validation using CatValidator
+            var validationResult = await new CatValidator().ValidateAsync(catDto, cancellationToken); 
             if (!validationResult.IsValid)
             {
-                // Handle validation errors here, perhaps throw an exception
                 throw new ValidationException(validationResult.Errors);
             }
 
@@ -38,8 +33,7 @@ namespace Application.Commands.Cats
                 AnimalId = Guid.NewGuid(),
                 Name = catDto.Name,
                 Breed = catDto.Breed,
-                Weight = (int)catDto.Weight,
-                LikesToPlay = catDto.LikesToPlay
+                Weight = (int)catDto.Weight
             };
 
             try
