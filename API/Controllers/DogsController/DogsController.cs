@@ -97,6 +97,5 @@ namespace API.Controllers.DogsController
             var dogs = await _mediator.Send(query);
             return Ok(dogs);
         }
-    
     }
 }
