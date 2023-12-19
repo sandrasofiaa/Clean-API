@@ -45,7 +45,7 @@ namespace Test.ApiTests
             var dogs = result.Value as List<Dog>;
 
             Assert.IsNotNull(dogs);
-            Assert.AreEqual(expectedDogs, dogs);
+            Assert.That(dogs, Is.EqualTo(expectedDogs));
         }
     }
 }
