@@ -1,5 +1,4 @@
-﻿using Application.Commands.Birds.DeleteBird;
-using Application.Validators;
+﻿using Application.Validators;
 using Domain.Models;
 using Infrastructure.Interface;
 using MediatR;
@@ -27,7 +26,6 @@ namespace Application.Commands.Birds.DeleteBird
 
             try
             {
-                // Anropa DeleteAsync<Bird> för att ta bort en fågel från databasen med request.Id
                 await _animalRepository.DeleteAsync<Bird>(request.Id);
                 return true;
             }

@@ -1,20 +1,20 @@
-﻿using Application.Queries.Cats.GetById; // Update the namespace
+﻿using Application.Queries.Cats.GetById;
 using Domain.Models;
 using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Animals.Queries.Cats.GetById // Update the namespace
+namespace Application.Animals.Queries.Cats.GetById
 {
-    public class GetCatByIdQueryHandler : IRequestHandler<GetCatByIdQuery, Cat> // Update class and request types
+    public class GetCatByIdQueryHandler : IRequestHandler<GetCatByIdQuery, Cat>
     {
-        private readonly IAnimalRepository _animalRepository; // Change repository interface
+        private readonly IAnimalRepository _animalRepository;
 
-        public GetCatByIdQueryHandler(IAnimalRepository catRepository) // Change constructor parameter
+        public GetCatByIdQueryHandler(IAnimalRepository catRepository)
         {
-            _animalRepository = catRepository; // Update repository assignment
+            _animalRepository = catRepository;
         }
 
-        public async Task<Cat?> Handle(GetCatByIdQuery request, CancellationToken cancellationToken) // Update return type and request type
+        public async Task<Cat?> Handle(GetCatByIdQuery request, CancellationToken cancellationToken)
         {
             Cat? wantedCat = await _animalRepository.GetByIdAsync(request.Id) as Cat;
 

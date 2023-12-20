@@ -22,7 +22,6 @@ namespace Application.Queries.Birds.GetById
             {
                 AnimalId = animalModel.AnimalId,
                 Name = animalModel.Name,
-                // Map other properties accordingly
             };
         }
     }

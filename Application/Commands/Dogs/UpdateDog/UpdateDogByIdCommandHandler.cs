@@ -1,7 +1,4 @@
-﻿using Application.Validators;
-using Application.Validators.DogValidator;
-using Domain.Models;
-using FluentValidation;
+﻿using Domain.Models;
 using Infrastructure.Interface;
 using MediatR;
 
@@ -20,11 +17,10 @@ namespace Application.Commands.Dogs.UpdateDog
 
             public async Task<Dog> Handle(UpdateDogByIdCommand request, CancellationToken cancellationToken)
             {
-                var dogDto = request.UpdatedDog; // Assuming UpdatedDog is of type DogDto
+                var dogDto = request.UpdatedDog;
 
                 try
                 {
-                    // Fetch the dog to update from the repository using a more generic method
                     Dog dogToUpdate = (Dog)await _animalRepository.GetByIdAsync(request.Id);
 
                     if (dogToUpdate != null)
@@ -34,7 +30,7 @@ namespace Application.Commands.Dogs.UpdateDog
                         dogToUpdate.Breed = dogDto.Breed;
                         dogToUpdate.Weight = (int)dogDto.Weight;
 
-                        // Call your repository method to update the dog in the database
+                        // Call the repository method to update the dog in the database
                         await _animalRepository.UpdateAnimalAsync(dogToUpdate);
 
                         // Return the updated dog

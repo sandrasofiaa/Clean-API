@@ -25,8 +25,8 @@ namespace Application.Handlers.Users
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to update user's animal."); // Logga felmeddelandet
-                throw; // Kasta undantaget vidare för att behålla ursprunglig funktionalitet
+                _logger.LogError(ex, "Failed to update user's animal.");
+                throw;
             }
         }
     }

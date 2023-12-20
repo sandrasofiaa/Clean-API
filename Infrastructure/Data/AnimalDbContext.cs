@@ -19,7 +19,7 @@ namespace Domain.Data
 
         public AnimalDbContext() // Parameterlös konstruktor
         {
-            // Eventuell initialisering eller annan logik utan parametrar
+
         }
         public AnimalDbContext(DbContextOptions<AnimalDbContext> options, IConfiguration configuration)
             : base(options)
@@ -44,22 +44,18 @@ namespace Domain.Data
                 .WithMany(a => a.UserAnimals)
                 .HasForeignKey(ua => ua.AnimalId);
 
-            // Lägg till konfiguration för att inkludera UserName från User och Name från AnimalModel
             modelBuilder.Entity<UserAnimal>()
                 .Property(ua => ua.UserName)
-                .IsRequired(); // Anpassa efter dina behov, om det är obligatoriskt eller ej
+                .IsRequired();
 
             modelBuilder.Entity<UserAnimal>()
                 .Property(ua => ua.Name)
-                .IsRequired(); // Anpassa efter dina behov, om det är obligatoriskt eller ej
+                .IsRequired();
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserAnimals)
                 .WithOne(ua => ua.User)
                 .HasForeignKey(ua => ua.UserId);
-
-            // Fortsätt med eventuella andra konfigurationer för dina entiteter...
         }
-
     }
 }

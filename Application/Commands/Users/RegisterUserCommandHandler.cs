@@ -26,7 +26,6 @@ namespace Application.Commands.Users
                     Id = Guid.NewGuid(),
                     UserName = newUserDto.Username,
                     UserPassword = hashedPassword,
-                    // Inkludera andra användarrelaterade egenskaper om det behövs
                 };
 
                 await _userRepository.RegisterUser(newUser, newUserDto.Password);
@@ -38,7 +37,6 @@ namespace Application.Commands.Users
             }
             catch (Exception ex)
             {
-                // Hantera exceptioner på lämpligt sätt
                 throw;
             }
         }

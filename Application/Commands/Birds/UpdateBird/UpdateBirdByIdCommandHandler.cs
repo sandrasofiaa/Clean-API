@@ -21,20 +21,17 @@ namespace Application.Commands.Birds.UpdateBird
 
             public async Task<Bird> Handle(UpdateBirdByIdCommand request, CancellationToken cancellationToken)
             {
-                var birdDto = request.UpdatedBird; // Assuming UpdatedBird is of type BirdDto
+                var birdDto = request.UpdatedBird;
 
                 try
                 {
-                    // Fetch the bird to update from the repository using a more generic method
                     Bird birdToUpdate = (Bird)await _animalRepository.GetByIdAsync(request.Id);
 
                     if (birdToUpdate != null)
                     {
-                        // Update the properties of the bird
                         birdToUpdate.Name = birdDto.Name;
                         birdToUpdate.CanFly = birdDto.CanFly;
 
-                        // Call your repository method to update the bird in the database
                         await _animalRepository.UpdateAnimalAsync(birdToUpdate);
 
                         // Return the updated bird

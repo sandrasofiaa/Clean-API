@@ -37,7 +37,7 @@ namespace Application.Queries.Birds
             catch (Exception ex)
             {
                 _logger.LogError($"Ett fel inträffade vid hämtning av alla katter: {ex.Message}");
-                throw; // Kasta vidare undantaget för att hantera det på en högre nivå
+                throw;
             }
 
         }

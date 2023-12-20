@@ -12,11 +12,9 @@ public static class DependencyInjection
         services.AddMediatR(configuration => configuration.RegisterServicesFromAssembly(assembly));
         services.AddValidatorsFromAssembly(assembly);
 
-        // Lägg till registreringen för IUserRepository och dess implementation här
-        services.AddScoped<IUserRepository, UserRepository>(); // Byt ut UserRepository mot den faktiska implementationen
+        services.AddScoped<IUserRepository, UserRepository>();
 
-        // Lägg till registreringen för IAnimalRepository och dess implementation här
-        services.AddScoped<IAnimalRepository, AnimalRepository>(); // För AnimalRepository
+        services.AddScoped<IAnimalRepository, AnimalRepository>();
 
         return services;
     }

@@ -1,5 +1,5 @@
 ﻿using Domain.Models;
-using Infrastructure.Interface; // Lägg till detta namespace för att använda AnimalRepository
+using Infrastructure.Interface;
 using MediatR;
 
 namespace Application.Commands.Birds.AddBird
@@ -24,12 +24,11 @@ namespace Application.Commands.Birds.AddBird
             {
                 AnimalId = Guid.NewGuid(),
                 Name = request.NewBird.Name
-                // Fyll på med andra egenskaper för din hund om det behövs
             };
 
             try
             {
-                await _animalRepository.AddAnimalAsync(BirdToCreate); // Använd generiska metoden här
+                await _animalRepository.AddAnimalAsync(BirdToCreate);
                 return BirdToCreate;
             }
             catch (Exception ex)

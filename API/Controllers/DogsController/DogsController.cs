@@ -1,4 +1,4 @@
-﻿using Application.Commands.Dogs;
+﻿using Application.Commands.Dogs.AddDog;
 using Application.Commands.Dogs.DeleteDog;
 using Application.Commands.Dogs.UpdateDog;
 using Application.Dtos;
@@ -30,7 +30,6 @@ namespace API.Controllers.DogsController
         public async Task<IActionResult> GetAllDogs()
         {
             return Ok(await _mediator.Send(new GetAllDogsQuery()));
-            //return Ok("GET ALL DOGS");
         }
 
         // Get a dog by Id

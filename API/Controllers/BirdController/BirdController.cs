@@ -14,7 +14,7 @@ using Application.Commands.Birds.AddBird;
 
 namespace API.Controllers.BirdController
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class BirdController : ControllerBase

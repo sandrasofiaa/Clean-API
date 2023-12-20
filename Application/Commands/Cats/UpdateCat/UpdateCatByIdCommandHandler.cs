@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Commands.Cats.UpdateCat
 {
-    public class UpdateCatByIdCommandHandler : IRequestHandler<UpdateCatByIdCommand, Cat> //Updated class name and return type
+    public class UpdateCatByIdCommandHandler : IRequestHandler<UpdateCatByIdCommand, Cat>
     {
         private readonly IAnimalRepository _animalRepository;
 
@@ -13,14 +13,13 @@ namespace Application.Commands.Cats.UpdateCat
             _animalRepository = animalRepository;
         }
 
-        public async Task<Cat> Handle(UpdateCatByIdCommand request, CancellationToken cancellationToken) //Updated method signature
+        public async Task<Cat> Handle(UpdateCatByIdCommand request, CancellationToken cancellationToken)
         {
-            var catDto = request.UpdatedCat; //Assuming UpdatedCat is of type CatDto
+            var catDto = request.UpdatedCat;
 
             try
             {
-                //Fetch the cat to update from the repository using a more generic method
-                Cat catToUpdate = (Cat)await _animalRepository.GetByIdAsync(request.Id); //Updated variable names
+                Cat catToUpdate = (Cat)await _animalRepository.GetByIdAsync(request.Id);
 
                 if (catToUpdate != null)
                 {
@@ -29,7 +28,7 @@ namespace Application.Commands.Cats.UpdateCat
                     catToUpdate.Breed = catDto.Breed;
                     catToUpdate.Weight = (int)catDto.Weight;
 
-                    //Call your repository method to update the cat in the database
+                    //Call the repository method to update the cat in the database
                     await _animalRepository.UpdateAnimalAsync(catToUpdate);
 
                     //Return the updated cat

@@ -21,12 +21,10 @@ namespace Application.Handlers.Users
             try
             {
                 await _userRepository.DeleteAnimalByUser(request.UserId, request.AnimalId);
-                // Lägg till logik för lyckad borttagning här om det behövs
-                return Unit.Value; // Returnera Unit när borttagningen är klar
+                return Unit.Value;
             }
             catch (Exception ex)
             {
-                // Hantera fel om något går fel vid borttagningen av djuret från användaren
                 throw new ApplicationException("Failed to delete animal from user.", ex);
             }
         }

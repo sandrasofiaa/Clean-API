@@ -5,7 +5,7 @@ using FluentValidation;
 using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Commands.Dogs
+namespace Application.Commands.Dogs.AddDog
 {
     public class AddDogCommandHandler : IRequestHandler<AddDogCommand, Dog>
     {

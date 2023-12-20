@@ -53,8 +53,6 @@ namespace API.Controllers
                     Subject = new ClaimsIdentity(new[]
                     {
                 new Claim(ClaimTypes.Name, loginUser.Username),
-                // Anpassa detta beroende på hur du vill använda Password i tokenet
-                // Observera att det normalt inte är rekommenderat att inkludera lösenord i JWT-token
                 new Claim("Password", loginUser.Password)
             }),
                     Expires = DateTime.UtcNow.AddHours(1),
@@ -91,7 +89,7 @@ namespace API.Controllers
                 return Unauthorized("Invalid username or password");
             }
 
-            var token = GenerateJwtToken(model); // Använd 'model' istället för 'userDto'
+            var token = GenerateJwtToken(model);
 
             return Ok(new { Token = token });
         }
@@ -100,15 +98,13 @@ namespace API.Controllers
         [Route("addAnimalToUser")]
         public async Task<IActionResult> AddAnimalToUser([FromBody] AddAnimalToUserDto dto)
         {
-            // Skapa en UserAnimalDto från UserAnimal-modellen
+
             var userAnimalDto = new UserAnimalDto
             {
                 UserId = dto.UserId,
                 AnimalId = dto.AnimalId,
-                // Andra relevanta egenskaper här...
             };
 
-            // Skapa en AddNewAnimalCommand med UserAnimalDto
             var command = new AddNewAnimalCommand(userAnimalDto);
             var success = await _mediator.Send(command);
 

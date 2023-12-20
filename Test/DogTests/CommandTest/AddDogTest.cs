@@ -1,4 +1,5 @@
 ﻿using Application.Commands.Dogs;
+using Application.Commands.Dogs.AddDog;
 using Application.Dtos;
 using AutoFixture.NUnit3;
 using Domain.Models;

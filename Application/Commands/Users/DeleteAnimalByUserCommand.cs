@@ -2,7 +2,7 @@
 
 namespace Application.Commands.Users
 {
-    public class DeleteAnimalByUserCommand : IRequest<Unit> // Uppdatera detta till IRequest<Unit>
+    public class DeleteAnimalByUserCommand : IRequest<Unit>
     {
         public Guid UserId { get; }
         public Guid AnimalId { get; }
