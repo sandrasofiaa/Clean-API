@@ -1,5 +1,4 @@
 ﻿using Application.Common.Birds;
-using Application.Commands.Birds;
 using Application.Commands.Birds.DeleteBird;
 using Application.Dtos;
 using Application.Queries.Birds.GetAll;
@@ -9,6 +8,7 @@ using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Application.Commands.Birds.AddBird;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
