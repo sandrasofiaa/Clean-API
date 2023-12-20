@@ -187,7 +187,7 @@ namespace Infrastructure.Repositories.AnimalRepository
                                 UserId = userId,
                                 UserName = user.UserName,
                                 AnimalId = newAnimalId,
-                                Name = newAnimal.Name, 
+                                Name = newAnimal.Name,
                             };
 
                             _animalDbContext.UserAnimals.Add(newUserAnimal);

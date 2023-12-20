@@ -6,7 +6,7 @@ using Infrastructure.Interface;
 using Moq;
 using Test.TestHelpers;
 
-namespace Test.CatTests.QueryTest 
+namespace Test.CatTests.QueryTest
 {
     [TestFixture]
     public class GetCatByIdQueryHandlerTests
