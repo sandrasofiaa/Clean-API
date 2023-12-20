@@ -1,29 +1,48 @@
-﻿using Application.Commands.Cats.UpdateCat;
-using Domain.Models;
-using Infrastructure.Database;
+﻿using Domain.Models;
+using Infrastructure.Interface;
 using MediatR;
 
-namespace AApplication.Commands.Cats.UpdateCat
+namespace Application.Commands.Cats.UpdateCat
 {
     public class UpdateCatByIdCommandHandler : IRequestHandler<UpdateCatByIdCommand, Cat>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public UpdateCatByIdCommandHandler(MockDatabase mockDatabase)
+        public UpdateCatByIdCommandHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
-        public Task<Cat> Handle(UpdateCatByIdCommand request, CancellationToken cancellationToken)
+
+        public async Task<Cat> Handle(UpdateCatByIdCommand request, CancellationToken cancellationToken)
         {
-            Cat catToUpdate = _mockDatabase.Cats.FirstOrDefault(cat => cat.Id == request.Id);
+            var catDto = request.UpdatedCat;
 
-            if (catToUpdate != null)
+            try
             {
-                catToUpdate.Name = request.UpdatedCat.Name;
-                catToUpdate.LikesToPlay = request.UpdatedCat.LikesToPlay;
-            }
+                Cat catToUpdate = (Cat)await _animalRepository.GetByIdAsync(request.Id);
 
-            return Task.FromResult(catToUpdate);
+                if (catToUpdate != null)
+                {
+                    //Update the properties of the cat
+                    catToUpdate.Name = catDto.Name;
+                    catToUpdate.Breed = catDto.Breed;
+                    catToUpdate.Weight = (int)catDto.Weight;
+
+                    //Call the repository method to update the cat in the database
+                    await _animalRepository.UpdateAnimalAsync(catToUpdate);
+
+                    //Return the updated cat
+                    return catToUpdate;
+                }
+
+                // Handle if the cat is not found
+                return null; //or throw an exception
+            }
+            catch (Exception ex)
+            {
+                //Handle exceptions
+                throw;
+            }
         }
     }
 }

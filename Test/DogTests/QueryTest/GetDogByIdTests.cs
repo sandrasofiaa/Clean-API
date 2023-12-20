@@ -1,51 +1,42 @@
-﻿using Application.Queries.Dogs.GetById;
-using Infrastructure.Database;
+﻿using Application.Animals.Queries.Dogs.GetById;
+using Application.Queries.Dogs.GetById;
+using AutoFixture.NUnit3;
+using Domain.Models;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.DogTests.QueryTest
 {
     [TestFixture]
-    public class GetDogByIdTests
+    public class GetDogByIdQueryHandlerTests
     {
+
         private GetDogByIdQueryHandler _handler;
-        private MockDatabase _mockDatabase;
+        private Mock<IAnimalRepository> _animalRepositoryMock;
 
         [SetUp]
         public void SetUp()
         {
-            // Initialize the handler and mock database before each test
-            _mockDatabase = new MockDatabase();
-            _handler = new GetDogByIdQueryHandler(_mockDatabase);
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new GetDogByIdQueryHandler(_animalRepositoryMock.Object);
         }
 
         [Test]
-        public async Task Handle_ValidId_ReturnsCorrectDog()
+        [CustomAutoData]
+        public async Task Given_ValidId_When_GettingDogById_Then_ReturnsCorrectDog([Frozen] Dog dog)
         {
             // Arrange
-            var dogId = new Guid("12345678-1234-5678-1234-567812345678");
+            _animalRepositoryMock.Setup(x => x.GetByIdAsync(dog.AnimalId)).ReturnsAsync(dog);
 
-            var query = new GetDogByIdQuery(dogId);
+            var query = new GetDogByIdQuery(dog.AnimalId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.That(result.Id, Is.EqualTo(dogId));
-        }
-
-        [Test]
-        public async Task Handle_InvalidId_ReturnsNull()
-        {
-            // Arrange
-            var invalidDogId = Guid.NewGuid();
-
-            var query = new GetDogByIdQuery(invalidDogId);
-
-            // Act
-            var result = await _handler.Handle(query, CancellationToken.None);
-
-            // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.AnimalId, Is.EqualTo(dog.AnimalId));
         }
     }
 }

@@ -1,35 +1,42 @@
 ﻿using Application.Queries.Users.Login;
+using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Handlers.Users
+public class LoginUserHandler : IRequestHandler<LoginUserQuery, string>
 {
-    public class LoginUserHandler : IRequestHandler<LoginUserQuery, string>
+    private readonly IUserRepository _userRepository;
+
+    public LoginUserHandler(IUserRepository userRepository)
     {
-        public Task<string> Handle(LoginUserQuery request, CancellationToken cancellationToken)
+        _userRepository = userRepository;
+    }
+
+    public async Task<string> Handle(LoginUserQuery request, CancellationToken cancellationToken)
+    {
+        var username = request.LoginUser.Username;
+        var password = request.LoginUser.Password;
+
+        // Authenticate user using repository method
+        var user = await _userRepository.AuthenticateUserAsync(username, password);
+
+        if (user != null)
         {
-            // Här kan du hantera autentisering och JWT-generering med användardata från request.LoginUser.Username och request.LoginUser.Password
-
-            // Exempel:
-            var username = request.LoginUser.Username;
-            var password = request.LoginUser.Password;
-
-            // Utför autentisering av användaren här...
-
-            // Om autentiseringen lyckas, generera JWT-token
+            // If authentication succeeds, generate JWT token
             var token = GenerateJwtToken(username);
-
-            // Returnera JWT-token (eller annan relevant data) tillbaka
-            return Task.FromResult(token);
-        }
-
-        private string GenerateJwtToken(string username)
-        {
-            // Här kan du implementera logiken för att generera JWT-token baserat på användarnamnet (eller annan data)
-
-            // Detta är en stubb - Ersätt med din faktiska JWT-genereringslogik
-            var token = "ExempelJWTTokenFör" + username;
-
             return token;
         }
+
+        // Return null or throw an exception for failed authentication
+        return null;
+    }
+
+    private string GenerateJwtToken(string username)
+    {
+        // Implement logic to generate JWT token here based on the username
+        // ...
+
+        var token = "SecretKey" + username;
+
+        return token;
     }
 }

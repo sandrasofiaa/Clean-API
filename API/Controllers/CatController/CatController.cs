@@ -1,15 +1,16 @@
-﻿using Application.Commands.Cats.AddCat;
-using Application.Commands.Cats.DeleteCat;
+﻿using Application.Commands.Cats.DeleteCat;
 using Application.Commands.Cats.UpdateCat;
 using Application.Dtos;
 using Application.Queries.Cats.GetAll;
 using Application.Queries.Cats.GetById;
+using Application.Commands.Cats.AddCat;
+using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Application.Queries.Cats.GetCatsByBreedAndWeight;
+using Application.Validators.CatValidator;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace API.Controllers.CatController
+namespace API.Controllers.CatsController
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -21,7 +22,6 @@ namespace API.Controllers.CatController
             _mediator = mediator;
         }
 
-        // Get all Cats from database
         [HttpGet]
         [Route("getAllCats")]
         public async Task<IActionResult> GetAllCats()
@@ -29,7 +29,6 @@ namespace API.Controllers.CatController
             return Ok(await _mediator.Send(new GetAllCatsQuery()));
         }
 
-        //Get a Cats by Id
         [HttpGet]
         [Route("getCatById/{catId}")]
         public async Task<IActionResult> GetCatById(Guid catId)
@@ -37,46 +36,34 @@ namespace API.Controllers.CatController
             return Ok(await _mediator.Send(new GetCatByIdQuery(catId)));
         }
 
-
-        // Create a new Cat 
         [HttpPost]
         [Route("addNewCat")]
         public async Task<IActionResult> AddCat([FromBody] CatDto newCat)
         {
-            try
-            {
-                return Ok(await _mediator.Send(new AddCatCommand(newCat)));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(await _mediator.Send(new AddCatCommand(newCat)));
         }
 
-        // Update a specific Cat
+        // Update a specific cat
         [HttpPut]
         [Route("updateCat/{updatedCatId}")]
         public async Task<IActionResult> UpdateCat([FromBody] CatDto updatedCat, Guid updatedCatId)
         {
-            var existingCat = await _mediator.Send(new GetCatByIdQuery(updatedCatId));
+            // Validate the CatDto using FluentValidation
+            var catValidator = new CatValidator(); // Assuming CatValidator is your FluentValidation validator for CatDto
+            var validationResult = await catValidator.ValidateAsync(updatedCat);
 
-            if (existingCat == null)
+            if (!validationResult.IsValid)
             {
-                return NotFound();
+                // If validation fails, return a BadRequest with the validation errors
+                return BadRequest(validationResult.Errors);
             }
 
-            var updateCommand = new UpdateCatByIdCommand(updatedCat, updatedCatId);
-            var updatedCatResult = await _mediator.Send(updateCommand);
+            var command = new UpdateCatByIdCommand(updatedCat, updatedCatId);
 
-            if (updatedCatResult == null)
-            {
-                return BadRequest();
-            }
-
-            return Ok(updatedCatResult);
+            // Send the command via MediatR and let the handler handle the logic
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
-
-        // Delete Cat
 
         [HttpDelete]
         [Route("{DeleteCatId}")]
@@ -91,8 +78,15 @@ namespace API.Controllers.CatController
             }
             else
             {
-                return BadRequest("Failed to delete Cat");
+                return BadRequest("Failed to delete cat");
             }
+        }
+
+        [HttpGet("CatbyBreedAndWeight")]
+        public async Task<ActionResult<List<Cat>>> GetCatsByBreedAndWeight([FromQuery] GetCatsByBreedAndWeightQuery query)
+        {
+            var cats = await _mediator.Send(query);
+            return Ok(cats);
         }
     }
 }

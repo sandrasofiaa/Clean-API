@@ -1,50 +1,47 @@
-﻿using Application.Commands.Cats.AddCat;
+﻿using Application.Commands.Cats;
+using Application.Commands.Cats.AddCat;
 using Application.Dtos;
+using AutoFixture.NUnit3;
 using Domain.Models;
-using Infrastructure.Database;
+using FluentAssertions;
+using FluentValidation;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.CatTests.CommandTest
 {
     [TestFixture]
-    public class AddCatTest
+    public class AddCatCommandHandlerTests
     {
         private AddCatCommandHandler _handler;
-        private MockDatabase _mockDatabase;
+        private Mock<IAnimalRepository> _animalRepositoryMock;
+        private Mock<IValidator<CatDto>> _validatorMock;
 
         [SetUp]
         public void SetUp()
         {
-            // Initialize the handler and mock database before each test
-            _mockDatabase = new MockDatabase();
-            _handler = new AddCatCommandHandler(_mockDatabase);
+            _validatorMock = new Mock<IValidator<CatDto>>();
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new AddCatCommandHandler(_animalRepositoryMock.Object, _validatorMock.Object);
         }
 
         [Test]
-        public async Task GivenValidCatDto_AddCat_ReturnsNewCat()
+        [CustomAutoData]
+        public async Task AddCatCommandHandler_CreatesValidCat_ReturnsCat([Frozen] CatDto catDto)
         {
             // Arrange
-            var CatDto = new CatDto { Name = "Nisse", LikesToPlay = true };
-            var addCatCommand = new AddCatCommand(CatDto);
+            var command = new AddCatCommand(catDto);
 
             // Act
-            Cat addedCat = await _handler.Handle(addCatCommand, CancellationToken.None);
+            var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(addedCat);
-            Assert.That(addedCat.Name, Is.EqualTo(CatDto.Name));
-            Assert.That(addedCat.LikesToPlay, Is.EqualTo(CatDto.LikesToPlay));
-            Assert.IsTrue(_mockDatabase.Cats.Contains(addedCat));
-        }
-
-        [Test]
-        public void GivenInvalidCatDto_AddCat_ThrowsArgumentException()
-        {
-            // Arrange
-            var invalidCatDto = new CatDto { Name = "", LikesToPlay = false };
-            var addCatCommand = new AddCatCommand(invalidCatDto);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ArgumentException>(async () => await _handler.Handle(addCatCommand, CancellationToken.None));
+            result.Should().NotBeNull();
+            result.Name.Should().Be(catDto.Name);
+            result.Breed.Should().Be(catDto.Breed);
+            result.Weight.Should().Be((int)catDto.Weight);
+            _animalRepositoryMock.Verify(x => x.AddAnimalAsync(It.IsAny<Cat>()), Times.Once);
         }
     }
 }

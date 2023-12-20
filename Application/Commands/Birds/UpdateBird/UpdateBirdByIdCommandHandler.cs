@@ -1,29 +1,52 @@
-﻿using Application.Commands.Birds.UpdatedBird;
+﻿using Application.Common.Birds;
+using Application.Validators;
+using Application.Validators.BirdValidator;
 using Domain.Models;
-using Infrastructure.Database;
+using FluentValidation;
+using Infrastructure.Interface;
 using MediatR;
 
 namespace Application.Commands.Birds.UpdateBird
 {
-    public class UpdateBirdByIdCommandHandler : IRequestHandler<UpdateBirdByIdCommand, Bird>
+    namespace Application.Commands.Birds.UpdateBird
     {
-        private readonly MockDatabase _mockDatabase;
-
-        public UpdateBirdByIdCommandHandler(MockDatabase mockDatabase)
+        public class UpdateBirdByIdCommandHandler : IRequestHandler<UpdateBirdByIdCommand, Bird>
         {
-            _mockDatabase = mockDatabase;
-        }
-        public Task<Bird> Handle(UpdateBirdByIdCommand request, CancellationToken cancellationToken)
-        {
-            Bird birdToUpdate = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
+            private readonly IAnimalRepository _animalRepository;
 
-            if (birdToUpdate != null)
+            public UpdateBirdByIdCommandHandler(IAnimalRepository animalRepository)
             {
-                birdToUpdate.Name = request.UpdatedBird.Name;
-                birdToUpdate.CanFly = request.UpdatedBird.CanFly;
+                _animalRepository = animalRepository;
             }
 
-            return Task.FromResult(birdToUpdate);
+            public async Task<Bird> Handle(UpdateBirdByIdCommand request, CancellationToken cancellationToken)
+            {
+                var birdDto = request.UpdatedBird;
+
+                try
+                {
+                    Bird birdToUpdate = (Bird)await _animalRepository.GetByIdAsync(request.Id);
+
+                    if (birdToUpdate != null)
+                    {
+                        birdToUpdate.Name = birdDto.Name;
+                        birdToUpdate.CanFly = birdDto.CanFly;
+
+                        await _animalRepository.UpdateAnimalAsync(birdToUpdate);
+
+                        // Return the updated bird
+                        return birdToUpdate;
+                    }
+
+                    // Handle if the bird is not found
+                    return null; // or throw an exception
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions
+                    throw;
+                }
+            }
         }
     }
 }

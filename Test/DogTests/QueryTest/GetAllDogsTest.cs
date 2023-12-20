@@ -1,37 +1,48 @@
-﻿using Application.Queries.Dogs;
+﻿using Application.Animals.Queries.Dogs.GetAll;
 using Application.Queries.Dogs.GetAll;
+using AutoFixture.NUnit3;
 using Domain.Models;
-using Infrastructure.Database;
+using Domain.Models.Animal;
+using Infrastructure.Interface;
+using Microsoft.Extensions.Logging; // Import the namespace for ILogger
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.DogTests.QueryTest
 {
     [TestFixture]
-    public class GetAllDogsTest
+    public class GetAllDogsTests
     {
+        private Mock<IAnimalRepository> _animalRepositoryMock;
+        private Mock<ILogger<GetAllDogsQueryHandler>> _loggerMock; // Logger mock
+
         private GetAllDogsQueryHandler _handler;
-        private MockDatabase _mockDatabase;
 
         [SetUp]
         public void SetUp()
         {
-            _mockDatabase = new MockDatabase();
-            _handler = new GetAllDogsQueryHandler(_mockDatabase);
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _loggerMock = new Mock<ILogger<GetAllDogsQueryHandler>>(); // Initialize logger mock
+            _handler = new GetAllDogsQueryHandler(_animalRepositoryMock.Object, _loggerMock.Object); // Pass logger mock
         }
 
         [Test]
-        public async Task Handle_ReturnsAllDogsFromMockDatabase()
+        [CustomAutoData]
+        public async Task Handle_GetAllDogs_ReturnsValidDogList([Frozen] List<Dog> dogs)
         {
             // Arrange
-            var dogsList = _mockDatabase.Dogs;
+            var animalModels = dogs.Cast<AnimalModel>().ToList(); // Assuming Dog inherits from AnimalModel
+            _animalRepositoryMock.Setup(x => x.GetAllAsync()).ReturnsAsync(animalModels);
 
             var query = new GetAllDogsQuery();
 
             // Act
-            List<Dog> result = await _handler.Handle(query, CancellationToken.None);
+            var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.That(result.Count, Is.EqualTo(dogsList.Count));
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<List<Dog>>());
+            Assert.That(result, Is.Not.Empty);
         }
     }
 }

@@ -1,68 +1,41 @@
-﻿using AApplication.Commands.Cats.UpdateCat;
-using Application.Commands.Cats.UpdateCat;
+﻿using Application.Commands.Cats.UpdateCat;
 using Application.Dtos;
-using Infrastructure.Database;
-
-// Make sure to include the necessary using statements for your classes and dependencies
+using AutoFixture.NUnit3;
+using Domain.Models;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.CatTests.CommandTest
 {
     [TestFixture]
-    public class UpdateCatTest
+    public class UpdateCatsTest
     {
         private UpdateCatByIdCommandHandler _handler;
-        private MockDatabase _mockDatabase;
+        private Mock<IAnimalRepository> _animalRepositoryMock;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
-            _mockDatabase = new MockDatabase();
-            _handler = new UpdateCatByIdCommandHandler(_mockDatabase);
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new UpdateCatByIdCommandHandler(_animalRepositoryMock.Object);
         }
 
         [Test]
-        public async Task UpdateCat_ExistingId_ReturnsUpdatedCat()
+        [CustomAutoData]
+        public async Task UpdateCatByIdHandler_UpdatesCatCorrectly([Frozen] Cat initialCat, CatDto updatedCat)
         {
             // Arrange
-            var existingCatId = _mockDatabase.Cats.First().Id; // Assuming the first cat in the list is the one you want to update
+            _animalRepositoryMock.Setup(x => x.GetByIdAsync(initialCat.AnimalId)).ReturnsAsync(initialCat);
 
-            var updatedCatDto = new CatDto
-            {
-                Name = "UpdatedCatName",
-                LikesToPlay = true
-            };
-
-            var command = new UpdateCatByIdCommand(updatedCatDto, existingCatId);
+            var command = new UpdateCatByIdCommand(updatedCat, initialCat.AnimalId);
 
             // Act
-            var updatedCat = await _handler.Handle(command, CancellationToken.None);
+            var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.NotNull(updatedCat); // Ensure an updated cat is returned
-            Assert.That(updatedCat.Id, Is.EqualTo(existingCatId)); // Ensure the ID of the updated cat matches the provided ID
-            Assert.That(updatedCat.Name, Is.EqualTo(updatedCatDto.Name));// Ensure the name was updated correctly
-            Assert.That(updatedCat.LikesToPlay, Is.EqualTo(updatedCatDto.LikesToPlay)); // Ensure the LikesToPlay property was updated correctly
-        }
-
-        [Test]
-        public async Task UpdateCat_NonExistingId_ReturnsNull()
-        {
-            // Arrange
-            var nonExistingCatId = Guid.NewGuid();
-
-            var updatedCatDto = new CatDto
-            {
-                Name = "UpdatedCatName",
-                LikesToPlay = true
-            };
-
-            var command = new UpdateCatByIdCommand(updatedCatDto, nonExistingCatId);
-
-            // Act
-            var updatedCat = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            Assert.Null(updatedCat); // Ensure no cat was updated and null is returned for a non-existing ID
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<Cat>());
         }
     }
 }

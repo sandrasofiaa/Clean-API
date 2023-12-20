@@ -1,12 +1,14 @@
-﻿using Application.Commands.Birds.AddBird;
+﻿using Application.Common.Birds;
 using Application.Commands.Birds.DeleteBird;
-using Application.Commands.Birds.UpdatedBird;
 using Application.Dtos;
 using Application.Queries.Birds.GetAll;
+using Application.Queries.Birds.GetByColor;
 using Application.Queries.Birds.GetById;
+using Domain.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Application.Commands.Birds.AddBird;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -95,6 +97,15 @@ namespace API.Controllers.BirdController
             {
                 return BadRequest("Failed to delete Bird");
             }
+        }
+
+        [HttpGet("color/{color}")]
+        public async Task<ActionResult<List<Bird>>> GetBirdsByColor(string color)
+        {
+            var query = new GetBirdByColorQuery(color);
+            var birds = await _mediator.Send(query);
+
+            return Ok(birds);
         }
     }
 }

@@ -1,35 +1,41 @@
 ﻿using Domain.Models;
-using Infrastructure.Database;
+using Infrastructure.Interface;
 using MediatR;
 
 namespace Application.Commands.Birds.AddBird
 {
     public class AddBirdCommandHandler : IRequestHandler<AddBirdCommand, Bird>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public AddBirdCommandHandler(MockDatabase mockDatabase)
+        public AddBirdCommandHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<Bird> Handle(AddBirdCommand request, CancellationToken cancellationToken)
+        public async Task<Bird> Handle(AddBirdCommand request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(request.NewBird.Name))
             {
-                throw new ArgumentException("Bird's name cannot be empty or whitespace");
+                throw new ArgumentException("Bird name cannot be empty or whitespace");
             }
 
-            Bird birdToCreate = new()
+            Bird BirdToCreate = new Bird
             {
-                Id = Guid.NewGuid(),
-                Name = request.NewBird.Name,
-                CanFly = request.NewBird.CanFly
+                AnimalId = Guid.NewGuid(),
+                Name = request.NewBird.Name
             };
 
-            _mockDatabase.Birds.Add(birdToCreate);
-
-            return Task.FromResult(birdToCreate);
+            try
+            {
+                await _animalRepository.AddAnimalAsync(BirdToCreate);
+                return BirdToCreate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to add Bird to the database", ex);
+            }
         }
     }
+
 }

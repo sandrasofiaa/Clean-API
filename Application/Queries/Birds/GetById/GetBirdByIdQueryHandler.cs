@@ -1,22 +1,28 @@
 ﻿using Domain.Models;
-using Infrastructure.Database;
+using Domain.Models.Animal;
+using Infrastructure.Interface;
 using MediatR;
 
 namespace Application.Queries.Birds.GetById
 {
-    public class GetByBirdIdQueryHandler : IRequestHandler<GetBirdByIdQuery, Bird?>
+    public class GetBirdByIdQueryHandler : IRequestHandler<GetBirdByIdQuery, Bird>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public GetByBirdIdQueryHandler(MockDatabase mockDatabase)
+        public GetBirdByIdQueryHandler(IAnimalRepository animalRepository)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<Bird?> Handle(GetBirdByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Bird> Handle(GetBirdByIdQuery request, CancellationToken cancellationToken)
         {
-            Bird? wantedBird = _mockDatabase.Birds.FirstOrDefault(bird => bird.Id == request.Id);
-            return Task.FromResult(wantedBird);
+            AnimalModel animalModel = await _animalRepository.GetByIdAsync(request.Id);
+
+            return new Bird
+            {
+                AnimalId = animalModel.AnimalId,
+                Name = animalModel.Name,
+            };
         }
     }
 }

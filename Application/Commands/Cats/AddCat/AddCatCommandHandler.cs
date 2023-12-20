@@ -1,35 +1,50 @@
-﻿using Domain.Models;
-using Infrastructure.Database;
+﻿using Application.Commands.Cats.AddCat;
+using Application.Dtos;
+using Application.Validators.CatValidator;
+using Domain.Models;
+using FluentValidation;
+using Infrastructure.Interface;
 using MediatR;
 
-namespace Application.Commands.Cats.AddCat
+namespace Application.Commands.Cats
 {
     public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat>
     {
-        private readonly MockDatabase _mockDatabase;
+        private readonly IAnimalRepository _animalRepository;
 
-        public AddCatCommandHandler(MockDatabase mockDatabase)
+        public AddCatCommandHandler(IAnimalRepository animalRepository, IValidator<CatDto> validator)
         {
-            _mockDatabase = mockDatabase;
+            _animalRepository = animalRepository;
         }
 
-        public Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken)
+        public async Task<Cat> Handle(AddCatCommand request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(request.NewCat.Name))
+            var catDto = request.NewCat;
+
+            // Perform validation using CatValidator
+            var validationResult = await new CatValidator().ValidateAsync(catDto, cancellationToken);
+            if (!validationResult.IsValid)
             {
-                throw new ArgumentException("Cat's name cannot be empty or whitespace");
+                throw new ValidationException(validationResult.Errors);
             }
 
-            Cat CatToCreate = new()
+            Cat catToCreate = new Cat
             {
-                Id = Guid.NewGuid(),
-                Name = request.NewCat.Name,
-                LikesToPlay = request.NewCat.LikesToPlay
+                AnimalId = Guid.NewGuid(),
+                Name = catDto.Name,
+                Breed = catDto.Breed,
+                Weight = (int)catDto.Weight
             };
 
-            _mockDatabase.Cats.Add(CatToCreate);
-
-            return Task.FromResult(CatToCreate);
+            try
+            {
+                await _animalRepository.AddAnimalAsync(catToCreate);
+                return catToCreate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to add cat to the database", ex);
+            }
         }
     }
 }

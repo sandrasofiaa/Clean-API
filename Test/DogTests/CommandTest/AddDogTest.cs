@@ -1,51 +1,50 @@
 ﻿using Application.Commands.Dogs;
+using Application.Commands.Dogs.AddDog;
 using Application.Dtos;
+using AutoFixture.NUnit3;
 using Domain.Models;
-using Infrastructure.Database;
+using FluentAssertions;
+using FluentValidation;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
 namespace Test.DogTests.CommandTest
+
 {
     [TestFixture]
-    public class AddDogTests
+    public class AddDogCommandHandlerTests
     {
         private AddDogCommandHandler _handler;
-        private MockDatabase _mockDatabase;
+        private Mock<IAnimalRepository> _animalRepositoryMock;
+        private Mock<IValidator<DogDto>> _validatorMock;
 
         [SetUp]
         public void SetUp()
         {
-            // Initialize the handler and mock database before each test
-            _mockDatabase = new MockDatabase();
-            _handler = new AddDogCommandHandler(_mockDatabase);
+            _validatorMock = new Mock<IValidator<DogDto>>();
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new AddDogCommandHandler(_animalRepositoryMock.Object, _validatorMock.Object);
+
         }
 
         [Test]
-        public async Task GivenValidDogDto_AddDogReturnsNewDog()
+        [CustomAutoData]
+        public async Task AddDogCommandHandler_CreatesValidDog_ReturnsDog([Frozen] DogDto dogDto)
         {
             // Arrange
-            var DogDto = new DogDto { Name = "Fido" };
-            var addDogCommand = new AddDogCommand(DogDto);
+
+            var command = new AddDogCommand(dogDto);
 
             // Act
-            Dog addedDog = await _handler.Handle(addDogCommand, CancellationToken.None);
+            var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(addedDog);
-            Assert.That(addedDog.Name, Is.EqualTo(DogDto.Name));
-            Assert.IsTrue(_mockDatabase.Dogs.Contains(addedDog));
-        }
-
-        [Test]
-        public void Handle_EmptyNameWhenAddingNewDog_ThrowsArgumentException()
-        {
-            // Arrange
-            var mockDatabase = new MockDatabase();
-            var handler = new AddDogCommandHandler(mockDatabase);
-            var command = new AddDogCommand(new DogDto { Name = "" });
-
-            // Act & Assert
-            Assert.ThrowsAsync<ArgumentException>(() => handler.Handle(command, CancellationToken.None));
+            result.Should().NotBeNull();
+            result.Name.Should().Be(dogDto.Name);
+            result.Breed.Should().Be(dogDto.Breed);
+            result.Weight.Should().Be((int)dogDto.Weight);
+            _animalRepositoryMock.Verify(x => x.AddAnimalAsync(It.IsAny<Dog>()), Times.Once);
         }
     }
-
 }
