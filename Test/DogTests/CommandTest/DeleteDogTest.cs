@@ -22,7 +22,7 @@ namespace Test.DogTests.CommandTest
 
         [Test]
         [CustomAutoData]
-        public async Task WHEN_Handle_THEN_DeleteDog_return_true([Frozen] Dog initialDog)
+        public async Task DeleteDogByIdHandler_DeletesDog_ReturnsTrue([Frozen] Dog initialDog)
         {
             // Arrange
             _animalRepositoryMock.Setup(x => x.GetByIdAsync(initialDog.AnimalId)).ReturnsAsync(initialDog);

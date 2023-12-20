@@ -25,7 +25,7 @@ namespace Test.DogTests.CommandTest
 
         [Test]
         [CustomAutoData]
-        public async Task WHEN_Handle_THEN_UpdatesDog([Frozen] Dog initialDog, DogDto updatedDog)
+        public async Task UpdateDogByIdHandler_UpdatesDogCorrectly([Frozen] Dog initialDog, DogDto updatedDog)
         {
             // Arrange
             _animalRepositoryMock.Setup(x => x.GetByIdAsync(initialDog.AnimalId)).ReturnsAsync(initialDog);

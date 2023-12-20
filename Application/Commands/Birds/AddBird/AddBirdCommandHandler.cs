@@ -1,9 +1,8 @@
-﻿using Application.Commands.Birds;
-using Domain.Models;
+﻿using Domain.Models;
 using Infrastructure.Interface; // Lägg till detta namespace för att använda AnimalRepository
 using MediatR;
 
-namespace Application.Commands.Birds
+namespace Application.Commands.Birds.AddBird
 {
     public class AddBirdCommandHandler : IRequestHandler<AddBirdCommand, Bird>
     {

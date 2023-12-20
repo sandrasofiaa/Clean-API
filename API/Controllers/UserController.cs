@@ -100,36 +100,25 @@ namespace API.Controllers
         [Route("addAnimalToUser")]
         public async Task<IActionResult> AddAnimalToUser([FromBody] AddAnimalToUserDto dto)
         {
-            try
+            // Skapa en UserAnimalDto från UserAnimal-modellen
+            var userAnimalDto = new UserAnimalDto
             {
-                // Skapa en UserAnimalDto från UserAnimal-modellen
-                var userAnimalDto = new UserAnimalDto
-                {
-                    UserId = dto.UserId,
-                    AnimalId = dto.AnimalId,
-                    // Andra relevanta egenskaper här...
-                };
+                UserId = dto.UserId,
+                AnimalId = dto.AnimalId,
+                // Andra relevanta egenskaper här...
+            };
 
-                // Skapa en AddNewAnimalCommand med UserAnimalDto
-                var command = new AddNewAnimalCommand(userAnimalDto);
-                var success = await _mediator.Send(command);
+            // Skapa en AddNewAnimalCommand med UserAnimalDto
+            var command = new AddNewAnimalCommand(userAnimalDto);
+            var success = await _mediator.Send(command);
 
-                if (success)
-                {
-                    return Ok("Animal added to user successfully");
-                }
-                else
-                {
-                    return BadRequest("Failed to add animal to user");
-                }
-            }
-            catch (ArgumentException ex)
+            if (success)
             {
-                return NotFound(ex.Message);
+                return Ok("Animal added to user successfully");
             }
-            catch (Exception ex)
+            else
             {
-                return StatusCode(500, ex.Message);
+                return BadRequest("Failed to add animal to user");
             }
         }
 
@@ -137,22 +126,12 @@ namespace API.Controllers
         [Route("deleteAnimalFromUser")]
         public async Task<IActionResult> DeleteAnimalFromUser([FromBody] DeleteAnimalFromUserDto dto)
         {
-            try
-            {
-                var command = new DeleteAnimalByUserCommand(dto.UserId, dto.AnimalId);
-                await _mediator.Send(command);
+            var command = new DeleteAnimalByUserCommand(dto.UserId, dto.AnimalId);
+            await _mediator.Send(command);
 
-                return Ok("Animal deleted from user successfully");
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return Ok("Animal deleted from user successfully");
         }
+
 
         [HttpPut]
         [Route("updateUserAnimal")]
@@ -167,23 +146,10 @@ namespace API.Controllers
                 return BadRequest(errors);
             }
 
-            try
-            {
-                var command = new UpdateUserAnimalCommand(dto.UserId, dto.OldAnimalId, dto.NewAnimalId);
-                await _mediator.Send(command);
+            var command = new UpdateUserAnimalCommand(dto.UserId, dto.OldAnimalId, dto.NewAnimalId);
+            await _mediator.Send(command);
 
-                return Ok("User's animal updated successfully");
-            }
-            catch (Exception ex)
-            {
-                if (ex is ArgumentException)
-                {
-                    return NotFound(ex.Message);
-                }
-
-                // Print ex.ToString() to get a more detailed error message for debugging
-                return StatusCode(500, ex.ToString());
-            }
+            return Ok("User's animal updated successfully");
         }
     }
 }

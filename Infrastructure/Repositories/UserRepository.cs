@@ -95,7 +95,7 @@ namespace Infrastructure.Repositories.AnimalRepository
                     }
                 }
 
-                return null; // Return null if authentication fails
+                return null;
             }
             catch (Exception ex)
             {
@@ -115,8 +115,8 @@ namespace Infrastructure.Repositories.AnimalRepository
 
                 if (user != null && animal != null)
                 {
-                    userAnimal.UserName = user.UserName; // Inkludera användarnamnet från User-objektet
-                    userAnimal.Name = animal.Name; // Inkludera namnet från AnimalModel-objektet
+                    userAnimal.UserName = user.UserName;
+                    userAnimal.Name = animal.Name;
 
                     _animalDbContext.UserAnimals.Add(userAnimal);
                     await _animalDbContext.SaveChangesAsync();
@@ -176,7 +176,7 @@ namespace Infrastructure.Repositories.AnimalRepository
 
                     if (oldUserAnimal != null)
                     {
-                        _animalDbContext.UserAnimals.Remove(oldUserAnimal); // Ta bort den befintliga posten
+                        _animalDbContext.UserAnimals.Remove(oldUserAnimal);
 
                         var newAnimal = await _animalDbContext.AnimalModels.FirstOrDefaultAsync(a => a.AnimalId == newAnimalId);
 
@@ -187,12 +187,12 @@ namespace Infrastructure.Repositories.AnimalRepository
                                 UserId = userId,
                                 UserName = user.UserName,
                                 AnimalId = newAnimalId,
-                                Name = newAnimal.Name, // Tilldela 'Name' från det nya djuret
-                                                       // Lägg till andra egenskaper här
+                                Name = newAnimal.Name,
+                                                     
                             };
 
-                            _animalDbContext.UserAnimals.Add(newUserAnimal); // Lägg till den nya posten
-                            await _animalDbContext.SaveChangesAsync(); // Spara ändringarna i databasen
+                            _animalDbContext.UserAnimals.Add(newUserAnimal);
+                            await _animalDbContext.SaveChangesAsync();
                         }
                         else
                         {

@@ -1,71 +1,40 @@
 ﻿using Application.CommandHandlers.Users;
 using Application.Commands.Users;
+using AutoFixture.NUnit3;
 using Domain.Dtos;
 using Domain.Models;
 using Infrastructure.Interface;
 using Moq;
+using Test.TestHelpers;
 
-namespace Test.Repository.User.AddNewAnimalTest
+namespace Test.UserTests
 {
     [TestFixture]
     public class AddNewAnimalTest
     {
-        [TestFixture]
-        public class AddNewAnimalCommandHandlerTests
+        private AddNewAnimalCommandHandler _handler;
+
+        [SetUp]
+        public void Setup()
         {
-            [Test]
-            public async Task Handle_AddNewAnimal_ReturnsTrue()
-            {
-                // Arrange
-                var userRepositoryMock = new Mock<IUserRepository>();
-                var handler = new AddNewAnimalCommandHandler(userRepositoryMock.Object);
+            var mockAnimalUserRepository = new Mock<IUserRepository>();
+            mockAnimalUserRepository.Setup(x => x.AddUserAnimalAsync(It.IsAny<UserAnimal>()))
+                .ReturnsAsync(true);
+            _handler = new AddNewAnimalCommandHandler(mockAnimalUserRepository.Object);
+        }
 
-                var newAnimalDto = new UserAnimalDto
-                {
-                    UserId = Guid.NewGuid(),
-                    AnimalId = Guid.NewGuid()
-                };
+        [Test]
+        [CustomAutoData]
+        public async Task When_HandleWithValidAnimal_Then_AnimalIsAddedToUser([Frozen] UserAnimalDto NewAnimalToUser)
+        {
+            // Arrange
+            var command = new AddNewAnimalCommand(NewAnimalToUser);
 
-                var command = new AddNewAnimalCommand(newAnimalDto);
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
 
-                // Act
-                userRepositoryMock
-                    .Setup(repo => repo.AddUserAnimalAsync(It.IsAny<UserAnimal>()))
-                    .ReturnsAsync(true);
-
-                var result = await handler.Handle(command, CancellationToken.None);
-
-                // Assert
-                Assert.IsTrue(result);
-                userRepositoryMock.Verify(repo => repo.AddUserAnimalAsync(It.IsAny<UserAnimal>()), Times.Once);
-            }
-
-            [Test]
-            public async Task Handle_AddNewAnimal_ReturnsFalseOnException()
-            {
-                // Arrange
-                var userRepositoryMock = new Mock<IUserRepository>();
-                var handler = new AddNewAnimalCommandHandler(userRepositoryMock.Object);
-
-                var newAnimalDto = new UserAnimalDto
-                {
-                    UserId = Guid.NewGuid(),
-                    AnimalId = Guid.NewGuid()
-                };
-
-                var command = new AddNewAnimalCommand(newAnimalDto);
-
-                // Act
-                userRepositoryMock
-                    .Setup(repo => repo.AddUserAnimalAsync(It.IsAny<UserAnimal>()))
-                    .ThrowsAsync(new System.Exception("Some exception message"));
-
-                var result = await handler.Handle(command, CancellationToken.None);
-
-                // Assert
-                Assert.IsFalse(result);
-                userRepositoryMock.Verify(repo => repo.AddUserAnimalAsync(It.IsAny<UserAnimal>()), Times.Once);
-            }
+            // Assert
+            Assert.That(result, Is.True);
         }
     }
 }

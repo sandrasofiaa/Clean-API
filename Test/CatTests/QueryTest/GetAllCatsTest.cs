@@ -1,39 +1,48 @@
-﻿//using Application.Queries.Cats;
-//using Application.Queries.Cats.GetAll;
-//using Domain.Models;
-//using Infrastructure.Database;
+﻿using Application.Animals.Queries.Cats.GetAll;
+using Application.Queries.Cats.GetAll;
+using AutoFixture.NUnit3;
+using Domain.Models;
+using Domain.Models.Animal;
+using Infrastructure.Interface;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Test.TestHelpers;
 
-//namespace Test.CatTests.QueryTest
-//{
-//    [TestFixture]
-//    public class GetAllCatsTest
-//    {
-//        private GetAllCatsQueryHandler _handler;
-//        private MockDatabase _mockDatabase;
+namespace Test.CatTests.QueryTest
+{
+    [TestFixture]
+    public class GetAllCatsTests
+    {
+        private Mock<IAnimalRepository> _animalRepositoryMock;
+        private Mock<ILogger<GetAllCatsQueryHandler>> _loggerMock;
 
-//        [SetUp]
-//        public void SetUp()
-//        {
-//            _mockDatabase = new MockDatabase();
-//            _handler = new GetAllCatsQueryHandler(_mockDatabase);
-//        }
+        private GetAllCatsQueryHandler _handler;
 
-//        [Test]
-//        public async Task Handle_ReturnsAllCatsFromMockDatabase()
-//        {
-//            // Arrange
-//            var catsList = _mockDatabase.Cats;
+        [SetUp]
+        public void SetUp()
+        {
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _loggerMock = new Mock<ILogger<GetAllCatsQueryHandler>>();
+            _handler = new GetAllCatsQueryHandler(_animalRepositoryMock.Object, _loggerMock.Object);
+        }
 
-//            var query = new GetAllCatsQuery();
+        [Test]
+        [CustomAutoData]
+        public async Task Handle_GetAllCats_ReturnsValidCatList([Frozen] List<Cat> cats)
+        {
+            // Arrange
+            var animalModels = cats.Cast<AnimalModel>().ToList();
+            _animalRepositoryMock.Setup(x => x.GetAllAsync()).ReturnsAsync(animalModels);
 
-//            // Act
-//            List<Cat> result = await _handler.Handle(query, CancellationToken.None);
+            var query = new GetAllCatsQuery();
 
-//            // Assert
-//            Assert.IsNotNull(result);
-//            Assert.That(result.Count, Is.EqualTo(catsList.Count));
-//            Assert.IsTrue(result.SequenceEqual(catsList)); // Check if both lists have the same elements
-//        }
-//    }
-//}
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
 
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<List<Cat>>());
+            Assert.That(result, Is.Not.Empty);
+        }
+    }
+}

@@ -8,6 +8,7 @@ using Application.Queries.Birds.GetById;
 using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Application.Commands.Birds.AddBird;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

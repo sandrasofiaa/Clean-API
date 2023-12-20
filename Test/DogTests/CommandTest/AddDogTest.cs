@@ -29,7 +29,7 @@ namespace Test.DogTests.CommandTest
 
         [Test]
         [CustomAutoData]
-        public async Task Handle_ValidDog_ReturnsCreatedDog([Frozen] DogDto dogDto)
+        public async Task AddDogCommandHandler_CreatesValidDog_ReturnsDog([Frozen] DogDto dogDto)
         {
             // Arrange
 

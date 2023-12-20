@@ -1,53 +1,42 @@
-﻿//using Application.Queries.Birds.GetById;
-//using Application.Queries.Cats.GetById;
-//using Infrastructure.Database;
+﻿using Application.Animals.Queries.Cats.GetById;
+using Application.Queries.Cats.GetById;
+using AutoFixture.NUnit3;
+using Domain.Models;
+using Infrastructure.Interface;
+using Moq;
+using Test.TestHelpers;
 
-//namespace Test.CatTests.QueryTest
-//{
-//    [TestFixture]
-//    public class GetCatByIdTests
-//    {
-//        private GetCatBydIdQueryHandler _handler;
-//        private MockDatabase _mockDatabase;
+namespace Test.CatTests.QueryTest 
+{
+    [TestFixture]
+    public class GetCatByIdQueryHandlerTests
+    {
 
-//        [SetUp]
-//        public void SetUp()
-//        {
-//            // Initialize the handler and mock database before each test
-//            _mockDatabase = new MockDatabase();
-//            _handler = new GetCatBydIdQueryHandler(_mockDatabase);
-//        }
+        private GetCatByIdQueryHandler _handler; 
+        private Mock<IAnimalRepository> _animalRepositoryMock;
 
-//        //Returns Null
-//        [Test]
-//        public async Task Handle_ValidId_ReturnsCorrectCat()
-//        {
-//            // Arrange
-//            var catId = new Guid("87654321-4321-8765-4321-876543210124");
+        [SetUp]
+        public void SetUp()
+        {
+            _animalRepositoryMock = new Mock<IAnimalRepository>();
+            _handler = new GetCatByIdQueryHandler(_animalRepositoryMock.Object); 
+        }
 
-//            var query = new GetCatByIdQuery(catId);
+        [Test]
+        [CustomAutoData]
+        public async Task Given_ValidId_When_GettingCatById_Then_ReturnsCorrectCat([Frozen] Cat cat) 
+        {
+            // Arrange
+            _animalRepositoryMock.Setup(x => x.GetByIdAsync(cat.AnimalId)).ReturnsAsync(cat); 
 
-//            // Act
-//            var result = await _handler.Handle(query, CancellationToken.None);
+            var query = new GetCatByIdQuery(cat.AnimalId); 
 
-//            // Assert
-//            Assert.That(result, Is.Not.Null);
-//            Assert.That(result.AnimalId, Is.EqualTo(catId));
-//        }
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
 
-//        [Test]
-//        public async Task Handle_InvalidId_ReturnsNull()
-//        {
-//            // Arrange
-//            var invalidCatId = Guid.NewGuid();
-
-//            var query = new GetCatByIdQuery(invalidCatId);
-
-//            // Act
-//            var result = await _handler.Handle(query, CancellationToken.None);
-
-//            // Assert
-//            Assert.IsNull(result);
-//        }
-//    }
-//}
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.AnimalId, Is.EqualTo(cat.AnimalId));
+        }
+    }
+}
