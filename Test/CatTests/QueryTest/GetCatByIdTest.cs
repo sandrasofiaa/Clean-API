@@ -12,24 +12,24 @@ namespace Test.CatTests.QueryTest
     public class GetCatByIdQueryHandlerTests
     {
 
-        private GetCatByIdQueryHandler _handler; 
+        private GetCatByIdQueryHandler _handler;
         private Mock<IAnimalRepository> _animalRepositoryMock;
 
         [SetUp]
         public void SetUp()
         {
             _animalRepositoryMock = new Mock<IAnimalRepository>();
-            _handler = new GetCatByIdQueryHandler(_animalRepositoryMock.Object); 
+            _handler = new GetCatByIdQueryHandler(_animalRepositoryMock.Object);
         }
 
         [Test]
         [CustomAutoData]
-        public async Task Given_ValidId_When_GettingCatById_Then_ReturnsCorrectCat([Frozen] Cat cat) 
+        public async Task Given_ValidId_When_GettingCatById_Then_ReturnsCorrectCat([Frozen] Cat cat)
         {
             // Arrange
-            _animalRepositoryMock.Setup(x => x.GetByIdAsync(cat.AnimalId)).ReturnsAsync(cat); 
+            _animalRepositoryMock.Setup(x => x.GetByIdAsync(cat.AnimalId)).ReturnsAsync(cat);
 
-            var query = new GetCatByIdQuery(cat.AnimalId); 
+            var query = new GetCatByIdQuery(cat.AnimalId);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
