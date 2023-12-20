@@ -39,7 +39,7 @@ namespace Test.UserTests
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            Assert.AreEqual(Unit.Value, result);
+            Assert.That(result, Is.EqualTo(Unit.Value));
             _mockUserRepository.Verify(
                 x => x.UpdateUserAnimal(userId, oldAnimalId, newAnimalId),
                 Times.Once);

@@ -29,7 +29,7 @@ namespace Test.UserTests
 
             // Assert
             userRepositoryMock.Verify(repo => repo.DeleteAnimalByUser(userId, animalId), Times.Once);
-            Assert.AreEqual(Unit.Value, result);
+            Assert.That(result, Is.EqualTo(Unit.Value));
         }
     }
 }
